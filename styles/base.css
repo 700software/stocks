@@ -1,0 +1,40 @@
+
+@import url(https://fonts.googleapis.com/icon?family=Material+Icons);
+
+#__next { white-space: pre-wrap; }
+
+:root { font-size: 18px; line-height: 1.4; }
+body { margin: 0; color: black; background: white; font-family: roboto, sans-serif; }
+a:not(:hover) { text-decoration: none; }
+table { border-collapse: collapse; }
+td { padding: 0; }
+a img { border: 0; }
+
+
+button { background: hsl(108, 82%, 37%); background-image: linear-gradient(to bottom, hsl(108, 82%, 50%) 0%, hsla(108, 82%, 37%, 0) 50%, hsl(108, 82%, 20%) 100%); background-origin: border-box; }
+
+button[data-state], button:active { background-image: none; }
+
+button { margin: 0; border: .2em solid; border-color: rgba(255,255,255,.3) rgba(0,0,0,.2) rgba(0,0,0,.3) rgba(255,255,255,.2); padding: .1em .4em; font-family: inherit; font-size: inherit; color: white; cursor: pointer; font-weight: bold; border-radius: 1em; transition: all 500ms; }
+button:hover { color: yellow; transition: all 300ms; }
+button:active { color: #dd0; border-color: transparent; transition: all 200ms; }
+button::-moz-focus-inner { margin: -1px; padding: 0; border-width: 1px; }
+button[data-state=hold] { color: #666; background: #ccc; border-color: transparent; cursor: default; }
+button[data-state=thanks] { color: #080; background: #cea; border-color: transparent; cursor: default; transition: all 100ms; }
+button[data-state=confirm] { color: #0079d4; background: #ace; border-color: #0079d4; cursor: default; }
+button[data-state=whoops] { color: #800; background: #eca; border-color: transparent; cursor: default; }
+button[disabled] { color: #666; background: #ccc; border-color: #ddd #bbb #bbb #ddd; cursor: default; }
+
+/* push footer to bottom on screen and print */
+html, body, #__next { height: 100%; }
+#fillin { min-height: 100%; position: relative; }
+#fillin>:nth-last-child(2) { padding-bottom: 2.5rem; /* room for footer */}
+#fillin>footer { position: absolute; left: 0; bottom: 0; width: 100%; }
+footer { box-sizing: border-box; color: var(--gray); padding: .3em 0 .5em; }
+
+footer { text-align: center; }
+a { color: var(--hyperlink); }
+
+hr { border-style: solid none none; border-top-width: var(--border-width); border-color: var(--border-color); }
+
+.material-icons { position: relative; top: .13em; width: 1em; height: 1em; display: inline-block; overflow: hidden; user-select: none; cursor: inherit; }
