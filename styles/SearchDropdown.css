@@ -1,0 +1,46 @@
+
+/* <span> for SearchableUser.js or other future searchable dropdowns */
+.searchable-dropdown { display: inline-block; position: relative; margin: var(--input-margin); }
+
+/* 🔍 and ❌ icons */
+.searchable-dropdown>span.material-icons { color: var(--primary); font-size: var(--input-icon-font-size); padding-top: .1em; position: absolute; top: calc(var(--input-padding-top) + var(--input-border)); transition: opacity 300ms; }
+
+/* 🔍 icon */
+.searchable-dropdown>span.material-icons:first-child { left: var(--input-icon-left-left); pointer-events: none; }
+.searchable-dropdown>span.material-icons:first-child[data-hidden] { opacity: 0; }
+.searchable-dropdown>span.material-icons:first-child:not([data-hidden]) { transition-delay: 200ms; }
+
+/* <input> */
+.searchable-dropdown>input { box-sizing: border-box; padding-left: var(--input-icon-left-pad); padding-right: var(--input-icon-left-pad); margin: 0; transition: padding 500ms; }
+/* <input> padding adjusts depending on whether 🔍 is visible */
+.searchable-dropdown>span.material-icons:first-child[data-hidden] + input + input { padding-left: var(--input-padding-right); }
+
+/* ❌ icon */
+.searchable-dropdown>span.material-icons:last-of-type { right: var(--input-icon-left-left); cursor: pointer; }
+.searchable-dropdown>input::-ms-clear { display: none; }
+.searchable-dropdown>input:placeholder-shown + span { opacity: 0; visibility: hidden /* no transition */; }
+
+/* fade out on blur if <input type="hidden"/> has no value yet (span:first-child:not([data-hidden])) */
+.searchable-dropdown>:first-child:not([data-hidden]) + input + input:not(:placeholder-shown):not(:focus) { color: hsla(0deg 0% 0% / .3); transition: color 500ms; }
+.searchable-dropdown>:first-child:not([data-hidden]) + input + input:not(:placeholder-shown):not(:focus) + span { color: hsla(0deg 0% 0% / .3); transition: color 500ms; }
+
+/******************************************************************************/
+/* SearchableDropdownResults.js */
+
+/* hidden if input:not(:focus) or <input type="hidden"/> has value */
+.searchable-dropdown>input:last-of-type:not(:focus) ~ div,
+.searchable-dropdown>span:first-child[data-hidden] ~ div { opacity: 0; visibility: hidden; pointer-events: none; }
+
+/* position */
+.searchable-dropdown>div { position: absolute; left: calc(var(--input-icon-left-pad) - var(--input-padding-right)); right: calc(var(--input-icon-left-pad) - var(--input-padding-right)); transition: opacity 500ms, visibility 500ms; z-index: 1; }
+/* child padding consistent */
+.searchable-dropdown>div>div>a { padding: var(--input-padding-top) var(--input-padding-right); }
+.searchable-dropdown>div>div>.emptiness { padding: var(--input-padding-top) var(--input-padding-right); }
+
+/* look & feel */
+.searchable-dropdown>div { background: white; border: solid rgba(0,0,0,.2); border-width: 0 var(--input-border) var(--input-border); border-radius: 0 0 var(--input-radius) var(--input-radius); overflow: hidden; }
+
+.searchable-dropdown>div>div>a { display: block; white-space: nowrap; transition: background 300ms, color 300ms; cursor: pointer; }
+.searchable-dropdown>div>div>a:not([data-hovered]) { color: inherit; } /* normal var(--hyperlink) blue upon hovered */
+.searchable-dropdown>div>div>a[data-hovered] { background: var(--dropdown-hover-bg); transition: background 100ms, color 300ms; }
+.searchable-dropdown>div:active>div>a[data-hovered] { color: var(--hyperlinkActive); transition: background 100ms, color 100ms; }
