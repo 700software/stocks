@@ -8,8 +8,8 @@ body { margin: 0; color: black; background: white; font-family: roboto, sans-ser
 
 /* push footer to bottom on screen and print */
 #__next { min-height: 100vh; position: relative; }
-#fillin>:nth-last-child(2) { padding-bottom: 2.5rem; /* room for footer */}
-#fillin>footer { position: absolute; left: 0; bottom: 0; width: 100%; }
+#__next>:nth-last-child(2) { padding-bottom: 2.5rem; /* room for footer */}
+#__next>footer { position: absolute; left: 0; bottom: 0; width: 100%; }
 footer { box-sizing: border-box; color: var(--gray); padding: .3em 0 .5em; }
 
 footer { text-align: center; }
@@ -21,6 +21,34 @@ a img { border: 0; }
 
 hr { border-style: solid none none; border-top-width: var(--border-width); border-color: var(--border-color); }
 
+select { box-sizing: content-box; }
+
+:root {
+  --input-natural-content-height: 1.2em;
+  --input-margin-x: .05em;
+  --input-margin-y: .19em;
+  --input-margin: .19em .05em;
+  --input-border: 1.5px;
+  --input-border-color: rgba(0,0,0,.2);
+  --input-padding-top: .1em;
+  --input-padding-right: .4em;
+  --input-padding-x-radiusless: .2em;
+  --input-icon-left-left: calc(var(--input-padding-top) + var(--input-border) + .1em);
+  --input-icon-left-pad: calc(var(--input-icon-left-left) + var(--input-icon-font-size) - var(--input-border));
+  --input-icon-font-size: 1.1em;
+  --input-content: calc(1em * 1.2);
+  --input-radius: calc(var(--input-border) + var(--input-padding-top) + var(--input-content) / 2);
+}
+
+input, select, textarea, button, a.button { border: var(--input-border) solid; border-radius: var(--input-radius); padding: var(--input-padding-top) var(--input-padding-right); margin: var(--input-margin); }
+
+select { padding-top: calc(var(--input-padding-top) - .7px); padding-bottom: calc(var(--input-padding-top) - .7px); }
+
+input, select, textarea { font-family: inherit; font-size: inherit; border-color: var(--input-border-color); }
+[readonly], [disabled] { background: rgba(0,0,0,.07); border-color: transparent; opacity: 1; /* override browser's select:disabled opacity */ }
+option[disabled] { background: initial; }
+
+label { display: inline-block; user-select: none; }
 label, label input { cursor: pointer; }
 
 button { background: hsl(108, 82%, 37%); background-image: linear-gradient(to bottom, hsl(108, 82%, 50%) 0%, hsla(108, 82%, 37%, 0) 50%, hsl(108, 82%, 20%) 100%); background-origin: border-box; }
@@ -47,3 +75,5 @@ table.fancy>*>tr>th { font-weight: 500; text-align: inherit; }
 table.fancy>*>tr>* { padding: .3em .3em; }
 
 .material-icons { position: relative; top: .13em; width: 1em; height: 1em; display: inline-block; overflow: hidden; user-select: none; cursor: inherit; }
+
+.ellipsis-tooltipped { white-space: pre /*instead of pre-wrap*/; overflow: hidden; text-overflow: ellipsis; }

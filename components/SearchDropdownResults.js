@@ -1,7 +1,7 @@
 import React from 'react'
-import { ellipsisTooltip } from '../lib/,global'
+import { ellipsisTooltip } from '../lib/util'
 
-export default class SearchableDropdownResults extends React.Component {
+export default class SearchDropdownResults extends React.Component {
   constructor(props) {
     super(props)
     this.state = {}
@@ -60,7 +60,7 @@ function render(props, state) {
   var component = this
   if (!state.want)
     return null
-  return <div onMouseDown={balloonMouseDown}>{/* .searchable-dropdown>div */}
+  return <div onMouseDown={balloonMouseDown}>{/* .SearchableDropdown>div */}
     <div style={state.got && state.want == state.got.query ? {} : { opacity: .4 }}>
       {(() => {
         if (!state.got)
@@ -85,7 +85,7 @@ function render(props, state) {
                     this.setState({ hoveredLink: null })
                   }}
                   onClick={e => { e.preventDefault() }}
-                ><div className="ellipsis-tooltipped" dangerouslySetInnerHTML={{ __html: o.html }}></div></a>)
+                ><div className="ellipsis-tooltipped">{o.Component}</div></a>)
         else
           return <div className="emptiness">— No Results —</div>
       })()}

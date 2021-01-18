@@ -5,6 +5,9 @@
   --green: hsl(108, 82%, 37%);
   --blue: hsl(208, 100%, 37%);
   --blue-transparent: hsl(208deg 100% 37% / 0);
+
+  --primary: var(--blue);
+
   --border-width: 2px;
   --border-color: hsla(208, 60%, 87%, 1);
   --border-color: hsl(108deg 82% 37% / .2);

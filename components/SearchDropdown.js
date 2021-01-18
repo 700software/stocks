@@ -2,11 +2,13 @@
 //#
 //# Note BROWSER_CACHE in search-thing.js
 const QUERY_DELAY = 200
+const API_KEY = 'EHRDIWJJ2T30CLGF'
 //#
 
-import { extractProps, paramE } from '../lib/,global'
+import React from 'react'
+import { extractProps, paramE } from '../lib/util'
 import ajaxWave from '../lib/ajaxWave'
-import SearchableDropdownResults from './SearchableDropdownResults'
+import SearchDropdownResults from './SearchDropdownResults'
 
 const space = ' '
 const tab = 9
@@ -15,23 +17,54 @@ const esc = 27
 const arrowUp = 38
 const arrowDown = 40
 
-/** More to be implemented including autofill. */
-export default function SearchableThing(props) {
+export default React.forwardRef((props, ref) => <SearchDropdown {...props} innerRef={ref} />)
+
+class SearchDropdown extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+
+  shouldComponentUpdate(newProps) {
+    console.log(newProps)
+    for (var k in newProps)
+      if (typeof newProps[k] == 'function')
+        continue
+      else if (newProps[k] != this.props[k])
+        return true
+    console.log('false')
+    return false
+  }
+
+  render() { return render.call(this, this.props, this.state) }
+}
+
+function render(props, state) {
   var attrs = { ...props }
+
   var hiddenAttrs = extractProps({ name: null, defaultValue: '' }, attrs)
   var extraProps = extractProps({ defaultDisplay: '' }, attrs)
+  const { whenValue, innerRef } = extractProps({
+    whenValue: function (val, text, span, blurring) { },
+    innerRef: null,
+  }, attrs)
 
   var resultsComponent = React.createRef()
-  var hidden, input
+  var span, hidden, input
+
+  var blurringNow = false
 
   return <>
-    <span className="searchable-dropdown" ref={node => { if (node) eventHandlers(node) }}>
+    <span className="SearchableDropdown" ref={node => {
+      if (node) eventHandlers(node)
+      if (innerRef) innerRef.current = node
+    }}>
       <span className="material-icons">search</span>
       <input type="hidden" {...hiddenAttrs} />
       <input spellCheck={false} placeholder={space/* triggers :placeholder-shown */}
+        autoComplete="off" style={{ width: '17.5em' }}
         defaultValue={extraProps.defaultDisplay} {...attrs} />
       <span className="material-icons">clear</span>
-      <SearchableDropdownResults ref={resultsComponent} chose={chose} />
+      <SearchDropdownResults ref={resultsComponent} chose={chose} />
     </span>
   </>
 
@@ -40,7 +73,9 @@ export default function SearchableThing(props) {
       return
     hidden.value = o.key
     input.value = o.text
+    blurringNow = blurring
     hidden.oninput()
+    blurringNow = false
     if (hidden.value) {
       if (!blurring) {
         input.selectionStart = 0
@@ -50,7 +85,8 @@ export default function SearchableThing(props) {
     }
   }
 
-  function eventHandlers(span) {
+  function eventHandlers(s) {
+    span = s
 
     var icon = span.firstChild
     hidden = icon.nextSibling
@@ -68,8 +104,10 @@ export default function SearchableThing(props) {
         icon.setAttribute('data-hidden', '')
       else
         icon.removeAttribute('data-hidden')
+      whenValue(this.value, input.value, span, blurringNow)
     }
     input.onfocus = function () {
+      resultsComponent.current.setState({ want: this.value })
       if (this.readOnly || !hidden.value)
         return
       this.selectionStart = 0
@@ -78,7 +116,7 @@ export default function SearchableThing(props) {
     }
     input.onblur = function () {
       if (balloon) {
-        var active = balloon.firstChild.lastChild.querySelector(':scope>a[data-hovered]')
+        var active = balloon.firstChild.lastChild.querySelector(':scope>a[data-active]')
         if (active)
           selectLink(active, true)
       }
@@ -127,12 +165,14 @@ export default function SearchableThing(props) {
         input.focus()
     }
 
+    blurringNow = true
     hidden.oninput()
+    blurringNow = false
 
     function handleEnterPressed() {
       if (enterPressed)
         if (resultsComponent.current.state.got && resultsComponent.current.state.got.query == enterPressed.q)
-          resultsComponent.current.choose(enterPressed.enterNotJustTabAway)
+          resultsComponent.current.choose(enterPressed.enterNotJustTabAway, !enterPressed.enterNotJustTabAway)
     }
 
     function handleQueryMutation() {
@@ -169,20 +209,38 @@ export default function SearchableThing(props) {
       if (searchFetchGo['in progress: ' + queryHere])
         return
       searchFetchGo['in progress: ' + queryHere] = true
+
+      // TODO move out and generify
       ajaxWave({
-        url: '/api/search-things?q=' + paramE(queryHere),
+        url: `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&apikey=EHRDIWJJ2T30CLGF&keywords=${paramE(queryHere)}`,
         callback: function (wave, request) {
           delete searchFetchGo['in progress: ' + queryHere]
           if (queryHere == resultsComponent.current.state.want) {
             if (wave.json && request.status == 200)
-              resultsComponent.current.setState({ got: { query: queryHere, results: wave.json } })
+              resultsComponent.current.setState({ got: { query: queryHere, results: parseResults(wave) } })
             else
               resultsComponent.current.setState({ got: { query: queryHere, whoops: wave.text || wave.whoops } })
             handleEnterPressed()
           }
-        }
+        },
       })
     }
 
+    /** @todo move out and generify */
+    function parseResults(wave) {
+      var dedup = {}
+      var results = []
+      wave.json.bestMatches.forEach(r => {
+        if (dedup[r['1. symbol']])
+          return
+        dedup[r['1. symbol']] = true
+        results.push({
+          key: r['1. symbol'],
+          text: `${r['1. symbol']} - ${r['2. name']}`,
+          Component: <>{r['1. symbol']} - {r['2. name']}</>,
+        })
+      })
+      return results
+    }
   }
 }
