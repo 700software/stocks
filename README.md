@@ -23,9 +23,8 @@ A possible DoS scenario is that someone snags the (currently public) API key fro
 
 We could mitigate this by providing our own API endpoint with our own rate-limiting (and caching) to substantively (although not comprehensively) mitigate this DoS vector.
 
-The API key is currently stored [at the top if `SearchDropdown.js`].
-
+The API key is currently stored in [`next.config.js`].
 
   [stocks.700software.com]: https://stocks.700software.com
-  [`SearchDropdown.js`]:               components/SearchDropdown.js
-  [at the top if `SearchDropdown.js`]: components/SearchDropdown.js#L5
+  [`SearchDropdown.js`]: components/SearchDropdown.js
+  [`next.config.js`]: next.config.js#L4

@@ -20,11 +20,7 @@ header::after { content: ""; display: block; clear: both; }
 /* colors */
 .logo>:nth-child(1), .red { color: hsl(345, 100%, 40%); }
 a { color: hsl(208, 100%, 37%); }
-.blue { color: #0123B4; }
-.logo>:nth-child(3), a:active, .green { color: hsl(108, 82%, 37%); }
-.green { color: hsl(108, 82%, 35%); }
-.gray { color: #888; }
 
-::selection { background: hsla(208, 100%, 50%, .3); }
-::-moz-selection { background: hsla(208, 100%, 50%, .3); }
+#side-by-side-symbols::after { content: ""; display: block; clear: both }
+#side-by-side-symbols>article { float: left; width: 20em; border-right: solid 1px var(--gray); padding: .3em; }
 

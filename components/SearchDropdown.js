@@ -2,7 +2,6 @@
 //#
 //# Note BROWSER_CACHE in search-thing.js
 const QUERY_DELAY = 200
-const API_KEY = 'EHRDIWJJ2T30CLGF'
 //#
 
 import React from 'react'
@@ -44,7 +43,7 @@ function render(props, state) {
   var hiddenAttrs = extractProps({ name: null, defaultValue: '' }, attrs)
   var extraProps = extractProps({ defaultDisplay: '' }, attrs)
   const { whenValue, innerRef } = extractProps({
-    whenValue: function (val, text, span, blurring) { },
+    whenValue: null,
     innerRef: null,
   }, attrs)
 
@@ -191,8 +190,8 @@ function render(props, state) {
     function instantResult() {
       var q = resultsComponent.current.state.want
 
-      if (q.length < 3) {
-        resultsComponent.current.setState({ got: { query: q, gray: q ? 'Type at least three letters' : 'Loading...' } })
+      if (q.length < 1) {
+        resultsComponent.current.setState({ got: { query: q, gray: '...' } })
         return true
       }
     }
@@ -212,14 +211,14 @@ function render(props, state) {
 
       // TODO move out and generify
       ajaxWave({
-        url: `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&apikey=EHRDIWJJ2T30CLGF&keywords=${paramE(queryHere)}`,
+        url: `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${paramE(queryHere)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`,
         callback: function (wave, request) {
           delete searchFetchGo['in progress: ' + queryHere]
           if (queryHere == resultsComponent.current.state.want) {
-            if (wave.json && request.status == 200)
+            if (wave.json && request.status == 200 && wave.json.bestMatches)
               resultsComponent.current.setState({ got: { query: queryHere, results: parseResults(wave) } })
             else
-              resultsComponent.current.setState({ got: { query: queryHere, whoops: wave.text || wave.whoops } })
+              resultsComponent.current.setState({ got: { query: queryHere, whoops: wave.json && wave.json.Information || wave.text || wave.whoops } })
             handleEnterPressed()
           }
         },
@@ -228,6 +227,8 @@ function render(props, state) {
 
     /** @todo move out and generify */
     function parseResults(wave) {
+      if (!wave.json.bestMatches)
+        return null
       var dedup = {}
       var results = []
       wave.json.bestMatches.forEach(r => {

@@ -1,6 +1,7 @@
 /******************************************************************************/
 
 :root {
+  --gray: #888;
   --red: hsl(345, 100%, 40%);
   --green: hsl(108, 82%, 37%);
   --blue: hsl(208, 100%, 37%);
@@ -12,8 +13,8 @@
   --border-color: hsla(208, 60%, 87%, 1);
   --border-color: hsl(108deg 82% 37% / .2);
   --border-radius: 1rem;
-  --gray: hsl(0deg 0% 0% / .8);
   --hyperlink: #07C;
+  --dropdown-hover-bg: rgb(237, 237, 237);
 }
 
 ::selection { background: hsla(208, 100%, 50%, .3); }
@@ -22,7 +23,7 @@
 .red { color: var(--red); }
 .blue { color: var(--blue); }
 .green { color: var(--green); }
-.gray { color: #888; }
+.gray { color: var(--gray); }
 .italic { font-style: italic; }
 .condensed { font-family: 'Roboto Condensed', sans-serif; }
 .slab { font-family: 'Roboto Slab', serif; }
