@@ -1,14 +1,22 @@
 import Head from 'next/head'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import useSWR from 'swr'
 import Layout from '../components/Layout'
 import SearchInput from '../components/SearchDropdown'
 import jsonFetch from '../lib/jsonFetch'
 import { noAction, noHref, paramE, roundC } from '../lib/util'
 
+/**
+ * Increasing this limit past 3 would require layout considerations
+ * and, more needfully, a higher rate limit from our API
+ **/
+const COMPARISON_COUNT_LIMIT = 3
+
 export default function Home() {
 
   const [symbols, setSymbols] = useState(['IBM'])
+  const symbolsRef = useRef<string[]>()
+  symbolsRef.current = symbols
 
   return <Layout>
     <Head>
@@ -19,9 +27,28 @@ export default function Home() {
       <form ref={noAction}>
         <SearchInput
           placeholder="Stock Symbol or Company Name"
-          whenValue={(symbol) => {
+          whenValue={(symbol, text, span) => {
             if (!symbol)
               return ''
+
+            var symbols = symbolsRef.current
+
+            for (var i = 0; i < symbols.length; i++)
+              if (symbols[i] == symbol)
+                var alreadyAdded = true
+
+            var [hidden, input] = span.querySelectorAll('input')
+
+            if (symbols.length >= COMPARISON_COUNT_LIMIT && !alreadyAdded) {
+              alert('Sorry, limit of 3 in the comparison.')
+              input.value = hidden.value
+              input.oninput()
+              return
+            }
+
+            // blank out the search value
+            input.value = ''
+            input.oninput()
 
             for (var i = 0; i < symbols.length; i++)
               if (symbols[i] == symbol)
@@ -48,6 +75,7 @@ export default function Home() {
 }
 
 function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (event: any) => void }): JSX.Element {
+
   const { data, error } = useSWR<any>(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${paramE(symbol)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`, jsonFetch.then(json => {
     if (json.Information) throw json.Information
     else if (json.Note) throw json.Note
