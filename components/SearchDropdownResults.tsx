@@ -1,12 +1,14 @@
 import React from 'react'
-import { ellipsisTooltip } from '../lib/util'
+import { ellipsisTooltip, noHref } from '../lib/util'
 
 export default class SearchDropdownResults extends React.Component {
+  public props: { chose: Function }
+  public state: any
+
   constructor(props) {
     super(props)
     this.state = {}
   }
-  componentDidMount() { }
 
   keyNav(add) {
     if (!this.state.got || !this.state.got.results)
@@ -30,16 +32,16 @@ export default class SearchDropdownResults extends React.Component {
     this.setState({ hoveredLink: this.state.got.results[i].key })
   }
 
-  choose(orLonelyLink) {
+  choose(orLonelyLink, blurring) {
     var currentI = indexOfHoveredLink(this.state, orLonelyLink)
     if (currentI != -1)
-      this.props.chose(this.state.got.results[currentI])
+      this.props.chose(this.state.got.results[currentI], blurring)
   }
 
   render() { return render.call(this, this.props, this.state) }
 }
 
-function indexOfHoveredLink(state, orLonelyLink) {
+function indexOfHoveredLink(state, orLonelyLink?) {
   if (!state.got.results)
     return -1
   for (var i = 0; i < state.got.results.length; i++)
@@ -74,7 +76,7 @@ function render(props, state) {
             o =>
               o.key == 'limit'
                 ? <div className="emptiness" key={o.key}>{o.text}</div>
-                : <a jshref="javascript:" key={o.key}
+                : <a ref={noHref} key={o.key}
                   data-val={o.key}
                   data-hovered={o.key == this.state.hoveredLink ? true : null}
                   onMouseOver={e => {
@@ -94,7 +96,7 @@ function render(props, state) {
 
   function balloonMouseDown(e) {
     e.currentTarget.addEventListener('mouseup', function () {
-      component.choose() // An option will only be chosen if state.hoveredLink is not null
+      component.choose(false, false) // An option will only be chosen if state.hoveredLink is not null
     }, { once: true })
     e.preventDefault()
   }

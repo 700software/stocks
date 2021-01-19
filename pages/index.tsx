@@ -3,7 +3,8 @@ import { useState } from 'react'
 import useSWR from 'swr'
 import Layout from '../components/Layout'
 import SearchInput from '../components/SearchDropdown'
-import { noAction, paramE } from '../lib/util'
+import jsonFetch from '../lib/jsonFetch'
+import { noAction, noHref, paramE, roundC } from '../lib/util'
 
 export default function Home() {
 
@@ -29,37 +30,78 @@ export default function Home() {
             setSymbols([...symbols, symbol])
           }} />
       </form>
-      Symbols: {symbols.toString()}
 
       <div id="side-by-side-symbols">
         {symbols.length == 0
-          ? null
-          : symbols.map(symbol => <SymbolSection symbol={symbol} key={symbol} />)}
+          ? <p className="gray">
+            No symbols selected.
+          </p>
+          : symbols.map((symbol, i) => <SymbolSection symbol={symbol} key={symbol} whenRemove={function () {
+            var copy = [...symbols]
+            copy.splice(i, 1)
+            setSymbols(copy)
+          }} />)}
       </div>
 
     </main>
   </Layout>
 }
 
-function SymbolSection({ symbol }) {
-  const { data, error } = useSWR(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${paramE(symbol)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`, url => fetch(url).then(_ => _.json())
-    // { suspense: true }
-  )
+function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (event: any) => void }): JSX.Element {
+  const { data, error } = useSWR<any>(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${paramE(symbol)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`, jsonFetch.then(json => {
+    if (json.Information) throw json.Information
+    else if (json.Note) throw json.Note
+    else return json
+  }), { revalidateOnFocus: false })
 
+  const { data: dataQuote, error: errorQuote } = useSWR<any>(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${paramE(symbol)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`, jsonFetch.then(json => {
+    if (json.Information) throw json.Information
+    else if (json.Note) throw json.Note
+    else return json['Global Quote']
+  }), { revalidateOnFocus: false, refreshInterval: 1000 * 60 * 5 })
 
   return <>
     <article>
+      <a ref={noHref} className="material-icons" onClick={whenRemove} style={{ float: 'right' }}>clear</a>
       <h2>
         {symbol}<br />
+        {data ? data.Name : '...'}
       </h2>
       {error
-        ? <p className="red">Sorry, there was an error.</p>
+        ? <p className="red">Sorry, there was an error. {'' + error}</p>
         : !data
-          ? <p className="gray">Loading...</p>
+          ? null // Loading... is below
           : <>
-            {JSON.stringify(data, { indent: 2})}
           </>
       }
+
+      {!data && !error || !dataQuote && !errorQuote
+        ? <p className="gray">Loading...</p>
+        : null}
+
+      {errorQuote
+        ? error
+          ? <p className="red">{'' + errorQuote}</p>
+          : <p className="red">Sorry, there was an error. {'' + errorQuote}</p>
+        : !dataQuote
+          ? null // Loading... is above
+          : (function (): JSX.Element {
+            const changePercent = dataQuote['10. change percent'].replace('%', '')
+            const changePercentPositive = changePercent < 0 ? -changePercent : changePercent
+            return <>
+              <div>
+                ${roundC(dataQuote['05. price'], 6, 2)}
+                <br />
+
+                <span className={changePercent < 0 ? 'red' : changePercent > 0 ? 'green' : 'gray'}>
+                  {changePercent < 0 ? '−' : changePercent > 0 ? '+' : '±'}
+                  {roundC(changePercentPositive, 4, 4)}%
+                </span>
+              </div>
+            </>
+          }())
+      }
+
     </article>
   </>
 }

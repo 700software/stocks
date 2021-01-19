@@ -23,7 +23,7 @@
  *   },
  *   beforeSend: function (request) { } // optional for advanced use. (e.g. progress bar) See the request before it is finished.
  * })
- * @returns XMLHttpRequest (can be used to abort if conditions change)
+ * @returns {XMLHttpRequest} (can be used to abort if conditions change)
  * @callback wave contains ctype, json, html, text, whoops. (request is same as return value and can be used to check request.status)
  * @author Bryan Field
  */

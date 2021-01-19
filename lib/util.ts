@@ -1,17 +1,24 @@
+import { MouseEvent } from "react"
 
 /**
  * Sets `<form action="javascript:">` which is a 'do nothing' action.
  * The advantage here over ` action="#"` is that it won't scroll to top of page by default.
  **/
-export function noAction(node) { if (node) node.action = 'javascript:' }
+export function noAction(node: HTMLFormElement): void { if (node) node.action = 'javascript:' }
+
+/**
+ * Sets `<a href="javascript:">` which is a 'do nothing' href.
+ * The advantage here over ` href="#"` is that it won't scroll to top of page by default.
+ **/
+export function noHref(node: HTMLAnchorElement): void { if (node) node.href = 'javascript:' }
 
 /**
  * Adds `title` attribute only if the CSS ellipsis has appeared.
  * `title` will be applied to the parent in case the parent has some extra padding and border as part of the clickable or hoverable region.
  */
-export function ellipsisTooltip(e) {
+export function ellipsisTooltip(e: MouseEvent) {
   const parent = e.currentTarget
-  const child = parent.firstChild
+  const child: any = parent.firstChild
   if (child.offsetWidth < child.scrollWidth && !parent.getAttribute('title'))
     parent.setAttribute('title', child.innerText)
 }
@@ -77,7 +84,7 @@ export function roundC(x, digits, minDigits) {
 * @returns {number}
 */
 export function round(x, digits, minDigits) {
-  x = x < 0 ? x - .000000001 : x*1 + .000000001 // no comma strip, but fixes micro-rounding
+  x = x < 0 ? x - .000000001 : x * 1 + .000000001 // no comma strip, but fixes micro-rounding
   if (!digits && !minDigits) return Math.round(x) // more efficient when possible
   x = x.toFixed(digits) // round
   if (!minDigits) return x * 1 // returns number if no minDigits specified
@@ -93,5 +100,5 @@ export function round(x, digits, minDigits) {
 
 /** e.g. Converts 1000.1 to 1,000.1 */
 export function commaize(x) {
-  return (''+x).replace(/(\d)(?=(?:\d\d\d)+(?:\.|$))/g, '$1,').replace(/(\.\d*),/g, '$1')
+  return ('' + x).replace(/(\d)(?=(?:\d\d\d)+(?:\.|$))/g, '$1,').replace(/(\.\d*),/g, '$1')
 }

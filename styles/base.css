@@ -74,7 +74,7 @@ table.fancy>*>tr>td { border-top: solid 1px #ccc; }
 table.fancy>*>tr>th { font-weight: 500; text-align: inherit; }
 table.fancy>*>tr>* { padding: .3em .3em; }
 
-.material-icons { position: relative; top: .13em; width: 1em; height: 1em; display: inline-block; overflow: hidden; user-select: none; cursor: inherit; }
+.material-icons { position: relative; top: .13em; width: 1em; height: 1em; display: inline-block; overflow: hidden; user-select: none; }
 
 .ellipsis-tooltipped { white-space: pre /*instead of pre-wrap*/; overflow: hidden; text-overflow: ellipsis; }
 

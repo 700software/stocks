@@ -4,7 +4,7 @@
 const QUERY_DELAY = 200
 //#
 
-import React from 'react'
+import React, { Component } from 'react'
 import { extractProps, paramE } from '../lib/util'
 import ajaxWave from '../lib/ajaxWave'
 import SearchDropdownResults from './SearchDropdownResults'
@@ -16,9 +16,11 @@ const esc = 27
 const arrowUp = 38
 const arrowDown = 40
 
-export default React.forwardRef((props, ref) => <SearchDropdown {...props} innerRef={ref} />)
+export default React.forwardRef((props: any, ref) => <SearchDropdown {...props} innerRef={ref} />)
 
 class SearchDropdown extends React.Component {
+  public props: any
+
   constructor(props) {
     super(props)
   }
@@ -47,7 +49,7 @@ function render(props, state) {
     innerRef: null,
   }, attrs)
 
-  var resultsComponent = React.createRef()
+  var resultsComponent = React.createRef<SearchDropdownResults>()
   var span, hidden, input
 
   var blurringNow = false
@@ -117,7 +119,7 @@ function render(props, state) {
       if (balloon) {
         var active = balloon.firstChild.lastChild.querySelector(':scope>a[data-active]')
         if (active)
-          selectLink(active, true)
+          resultsComponent.current.choose(false, true)
       }
     }
     input.oninput = function () {
@@ -218,7 +220,7 @@ function render(props, state) {
             if (wave.json && request.status == 200 && wave.json.bestMatches)
               resultsComponent.current.setState({ got: { query: queryHere, results: parseResults(wave) } })
             else
-              resultsComponent.current.setState({ got: { query: queryHere, whoops: wave.json && wave.json.Information || wave.text || wave.whoops } })
+              resultsComponent.current.setState({ got: { query: queryHere, whoops: wave.json && (wave.json.Information || wave.json.Note) || wave.text || wave.whoops } })
             handleEnterPressed()
           }
         },

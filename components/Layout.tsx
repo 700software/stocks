@@ -1,6 +1,6 @@
 import Head from 'next/head'
 
-export default function Layout({ children }) {
+export default function Layout({ children }): JSX.Element {
   var gfonts = 'https://fonts.googleapis.com/css2?display=block'
     + '&family=Roboto:ital,wght@0,300;0,400;0,500;1,400'
     + '&family=Roboto+Slab'
