@@ -1,3 +1,6 @@
+
+// next.config.js will not be parsed by Webpack, Babel or TypeScript. https://nextjs.org/docs/api-reference/next.config.js/introduction
+
 module.exports = {
 
   env: {
