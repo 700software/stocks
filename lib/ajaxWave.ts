@@ -33,7 +33,13 @@ export default function ajaxWave(o) {
 
   var request = new XMLHttpRequest()
 
-  var wave = {}
+  var wave: {
+    whoops?: string
+    ctype?: string
+    json?: object
+    text?: string
+    html?: string
+  } = {}
 
   request.onreadystatechange = function () {
     if (request.readyState != 4) return
