@@ -91,6 +91,12 @@ function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (ev
     else return json['Global Quote']
   }), { revalidateOnFocus: false, refreshInterval: 1000 * 60 * 5 })
 
+  if (data && !data.Name && JSON.stringify(data) == '{}') {
+    data = null
+    if (!error)
+    error = 'Empty response {} from API provided. Try another symbol to see more details.'
+  }
+
   if (SUPPRESS_NETWORK_ERRORS) {
     error = null
     errorQuote = null
@@ -103,12 +109,12 @@ function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (ev
         <div className="mono">{symbol}</div>
         {data ? data.Name : '...'}
       </h2>
-      {error
+      {error && !data
         ? <p className="red">Sorry, there was an error. {'' + error}</p>
         : null}
 
-      {errorQuote
-        ? error
+      {!dataQuote && errorQuote
+        ? error && !data
           ? <p className="red">{'' + errorQuote}</p>
           : <p className="red">Sorry, there was an error. {'' + errorQuote}</p>
         : (function (): JSX.Element {
@@ -158,7 +164,7 @@ function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (ev
         }())
       }
 
-      {error
+      {!data && error
         ? null
         : (function () {
 
