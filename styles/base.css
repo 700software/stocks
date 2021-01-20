@@ -1,6 +1,10 @@
 
 @import url(https://fonts.googleapis.com/icon?family=Material+Icons);
 
+/* master width of page content */
+.the-width { margin: 0 auto; width: 64em; min-width: 70%; max-width: 94%; }
+.extend-right-edge { margin-right: -3%; }
+
 #__next { white-space: pre-wrap; min-height: 100vh; }
 
 :root { font-size: 18px; line-height: 1.4; }
@@ -10,9 +14,8 @@ body { margin: 0; color: black; background: white; font-family: roboto, sans-ser
 #__next { min-height: 100vh; position: relative; }
 #__next>:nth-last-child(2) { padding-bottom: 2.5rem; /* room for footer */}
 #__next>footer { position: absolute; left: 0; bottom: 0; width: 100%; }
-footer { box-sizing: border-box; color: var(--gray); padding: .3em 0 .5em; }
+footer { box-sizing: border-box; color: var(--gray); padding: .3em 0 .5em; text-align: center; }
 
-footer { text-align: center; }
 a { color: var(--hyperlink); }
 a:not(:hover) { text-decoration: none; }
 table { border-collapse: collapse; }
@@ -78,11 +81,9 @@ table.fancy>*>tr>* { padding: .3em .3em; }
 
 .ellipsis-tooltipped { white-space: pre /*instead of pre-wrap*/; overflow: hidden; text-overflow: ellipsis; }
 
-
 h1 { }
 h2 { font-weight: normal; }
-h2 em { font-family: 'Roboto Slab'; }
-h3 { }
+h3 { font-weight: 500; }
 h4 { }
 h5 { }
 h6 { }

@@ -2,11 +2,11 @@ import Head from 'next/head'
 
 export default function Layout({ children }): JSX.Element {
   var gfonts = 'https://fonts.googleapis.com/css2?display=block'
-    + '&family=Roboto:ital,wght@0,300;0,400;0,500;1,400'
+    + '&family=Roboto:ital,wght@0,400;0,500'
     + '&family=Roboto+Slab'
+    + '&family=Roboto+Mono'
     + '&family=Roboto+Condensed'
     + '&family=Cinzel'
-    + '&family=Inter:wght@300;400'
   return <>
     <Head>
       <link href={gfonts} rel="stylesheet" />

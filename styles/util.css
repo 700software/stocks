@@ -27,6 +27,7 @@
 .italic { font-style: italic; }
 .condensed { font-family: 'Roboto Condensed', sans-serif; }
 .slab { font-family: 'Roboto Slab', serif; }
+.mono { font-family: 'Roboto Mono', monospace; }
 
 /******************************************************************************/
 
@@ -41,8 +42,7 @@ strong { font-weight: 500; }
 
 /******************************************************************************/
 
-em { font-style: inherit; }
-.aleft { text-align: left; }
+.fleft { float: left; }
 .ib { display: inline-block; }
 .italic { font-style: italic; }
 .bold { font-weight: bold; }
