@@ -94,7 +94,7 @@ function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (ev
   if (data && !data.Name && JSON.stringify(data) == '{}') {
     data = null
     if (!error)
-    error = 'Empty response {} from API provided. Try another symbol to see more details.'
+    error = 'Empty response {} from API provided.\n\nTry another symbol to see more details.'
   }
 
   if (SUPPRESS_NETWORK_ERRORS) {
@@ -185,7 +185,7 @@ function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (ev
               <> </>
               {/* This is a primitive graphical representation. We could use a highcharts library for graphs, etc. */}
               <span style={{ display: 'inline-block', position: 'relative', width: '1em' }}>
-                <div style={{ height: epsRatio * 20 + 'em', background: 'green', maxHeight: '10em', position: 'absolute' }}></div>
+                <div style={{ height: epsRatio * 20 + 'em', background: 'var(--green)', maxHeight: '10em', position: 'absolute', bottom: 0, right: 0, width: '100%' }}></div>
               </span>
             </div>
 
