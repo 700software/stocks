@@ -6,18 +6,18 @@ export default function Layout({ children }): JSX.Element {
     + '&family=Roboto+Slab'
     + '&family=Roboto+Mono'
     + '&family=Roboto+Condensed'
-    + '&family=Cinzel'
   return <>
     <Head>
       <link href={gfonts} rel="stylesheet" />
       <meta name="viewport" content="initial-scale=1, minimum-scale=1, width=device-width" />
       <link rel="icon" href="/favicon.ico" />
       <meta property="og:image" content="/_next/image?url=/favisplash.png&w=1920&q=75" />
+      <title>Stock Comparison Tool</title>
     </Head>
     <header>
       <div className="the-width">
-        <img src="/_next/image?url=https://700software.com/bryan.jpg&w=640&q=75" id="head-me-circle" />
-        <h1>stocks</h1>
+        <img src="/_next/image?url=/bryan-white.jpg&w=256&q=75" id="head-me-circle" />
+        <h1>Stock Comparison Tool</h1>
         <p>{process.env['NEXT_PUBLIC_BRAND']} Sample project</p>
       </div>
     </header>
@@ -27,7 +27,10 @@ export default function Layout({ children }): JSX.Element {
         <span className="material-icons">code</span>
         <span> </span>
         Source
-        </a>
+      </a>
+      {process.env.NEXT_PUBLIC_BRAND
+        ? null
+        : <>
       <>       </>
       <a href="https://700software.com" target="_blank">
         <span className="material-icons">home</span>
@@ -40,6 +43,7 @@ export default function Layout({ children }): JSX.Element {
         <> </>
         423-802-8971
       </span>
+        </>}
     </footer>
   </>
 }

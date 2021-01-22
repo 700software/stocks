@@ -1,12 +1,16 @@
 
 header {
-	background: var(--blue);
-	color: white;
+	background: var(--primary);
+	color: var(--primary-text);
 	padding: 3px;
+	font-family: 'Roboto Condensed';
+	/* font-variant: small-caps; */
+	text-transform: uppercase;
+	font-size: .9em;
 }
-#head-me-circle { float: left; width: 5em; height: 5em; border-radius: 999px; border: solid 2px white; margin-right: 1em; }
-header h1 { margin: 0; font-family: Cinzel; font-weight: normal; }
-header p { margin: 0; font-family: Cinzel; }
+#head-me-circle { float: left; width: 4em; height: 4em; border-radius: 999px; border: solid 2px #eee; margin-right: 1em; }
+header h1 { margin: 0; font-weight: normal; }
+header p { margin: 0; }
 header::after { content: ""; display: block; clear: both; }
 
 #side-by-side-symbols::after { content: ""; display: block; clear: both; }

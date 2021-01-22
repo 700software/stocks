@@ -1,9 +1,7 @@
-import Head from 'next/head'
 import { useRef, useState } from 'react'
 import useSWR from 'swr'
 import Layout from '../components/Layout'
 import SearchDropdown, { SearchDropdownHandle } from '../components/SearchDropdown'
-import SearchInput from '../components/SearchDropdown-original-dom-version'
 import jsonFetch from '../lib/jsonFetch'
 import { noAction, noHref, paramE, roundC } from '../lib/util'
 
@@ -25,9 +23,6 @@ export default function Home() {
   var searchDropdownRef = useRef<SearchDropdownHandle>()
 
   return <Layout>
-    <Head>
-      <title>stocks.700software.com</title>
-    </Head>
     <main className="the-width">
       <p>Enter up to three stocks or company names to compare stock prices.</p>
       <form ref={noAction}>

@@ -7,13 +7,14 @@
   --blue: hsl(208, 100%, 37%);
   --blue-transparent: hsl(208deg 100% 37% / 0);
 
-  --primary: var(--blue);
+  --primary: #3CC3B2;
+  --primary-text: white;
 
   --border-width: 2px;
   --border-color: hsla(208, 60%, 87%, 1);
   --border-color: hsl(108deg 82% 37% / .2);
   --border-radius: 1rem;
-  --hyperlink: #07C;
+  --hyperlink: var(--primary);
   --dropdown-hover-bg: rgb(237, 237, 237);
 }
 
