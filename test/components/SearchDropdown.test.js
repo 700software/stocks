@@ -1,5 +1,5 @@
 import SearchDropdown from '@components/SearchDropdown'
-import { fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent } from '@testing-library/react'
 import React from 'react'
 import { render, screen } from '../test-utils'
 
@@ -125,10 +125,11 @@ describe('SearchDropdown', () => {
     expect(elem).toBeInTheDocument()
   })
   it('should bring in search results', async () => {
-    var {container, rerender} = render(<div><SearchDropdown /></div>)
+    var { container, rerender } = render(<div><SearchDropdown /></div>)
     var input = container.querySelector('input:not([type=hidden])')
 
-    fetch.once(mockResponse)
+    if (!process.env.TEST_INTEGRATIONS)
+      fetch.once(mockResponse)
     fireEvent.change(input, {
       target: {
         value: 'BA',
@@ -137,7 +138,7 @@ describe('SearchDropdown', () => {
         value: 'BA',
       },
     })
-    
+
     rerender(<div><SearchDropdown /></div>)
     await screen.findByText(/Boeing/);
   })

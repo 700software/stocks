@@ -1,5 +1,7 @@
 import '@testing-library/jest-dom'
-import jestFetchMock from 'jest-fetch-mock'
 
-jestFetchMock.enableMocks()
+if (process.env.TEST_INTEGRATIONS)
+  global.fetch = require('node-fetch')
+else
+  require('jest-fetch-mock').enableMocks()
 

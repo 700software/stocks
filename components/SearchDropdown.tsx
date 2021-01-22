@@ -104,7 +104,6 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
     handleQueryMutation(valueSearch)
   }
   function oninput(valueSearch) {
-    console.log('oninput')
     internalRef.current.enterPressed = null
     setValueHidden('')
     handleQueryMutation(valueSearch)
@@ -192,7 +191,7 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
         var response: any = await jsonFetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${paramE(queryHere)}&apikey=${apiKey}`
           , { timeout: 8000 })
       } catch (e) {
-        var errStr = e
+        var errStr = '' + e
       }
 
       if (response)

@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "test": "jest",
+    "testi": "set TEST_INTEGRATIONS=1&& jest",
     "start": "next start"
   },
   "dependencies": {
