@@ -17,8 +17,8 @@ export default function Layout({ children }): JSX.Element {
     <header>
       <div className="the-width">
         <img src="/_next/image?url=https://700software.com/bryan.jpg&w=640&q=75" id="head-me-circle" />
-        <h1>stocks.700Software.com</h1>
-        <p>Sample project</p>
+        <h1>stocks</h1>
+        <p>{process.env['NEXT_PUBLIC_BRAND']} Sample project</p>
       </div>
     </header>
     {children}
