@@ -1,7 +1,9 @@
 //#
 //#
 //# Note BROWSER_CACHE in search-thing.js
-const QUERY_DELAY = 300
+const QUERY_DELAY = process.env.JEST_WORKER_ID ? 0 : 300
+import fetchTimeout from '@lib/fetchTimeout'
+import jsonFetch from '@lib/jsonFetch'
 //#
 
 import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
@@ -46,7 +48,7 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
     return {
       setValue: (hiddenValue, searchString) => {
         setValueHidden(hiddenValue)
-        setValueSearch(searchString)
+        setValueSearch(internalRef.current.valueSearch = searchString)
         resultsComponent.current.setState({ hoveredLink: null })
         internalRef.current.enterPressed = null
         oninput(searchString)
@@ -62,7 +64,7 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
         autoComplete="off" style={{ width: '17.5em' }}
         {...attrs}
         onChange={e => {
-          setValueSearch(e.currentTarget.value)
+          setValueSearch(internalRef.current.valueSearch = e.currentTarget.value)
           oninput(e.currentTarget.value)
         }}
         onFocus={onfocus}
@@ -83,7 +85,7 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
 
   function chose(o, blurring) {
     setValueHidden(o.key)
-    setValueSearch(o.text)
+    setValueSearch(internalRef.current.valueSearch = o.text)
     uponHiddenValueSet(o.key, o.text, blurring)
   }
 
@@ -102,6 +104,7 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
     handleQueryMutation(valueSearch)
   }
   function oninput(valueSearch) {
+    console.log('oninput')
     internalRef.current.enterPressed = null
     setValueHidden('')
     handleQueryMutation(valueSearch)
@@ -134,7 +137,7 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
     }
   }
   function clickedX(e) {
-    setValueSearch('')
+    setValueSearch(internalRef.current.valueSearch = '')
     oninput('')
     inputRef.current.focus()
     e.preventDefault()
@@ -155,7 +158,7 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
       return
 
     if (internalRef.current.timeout == null)
-      internalRef.current.timeout = setTimeout(searchFetchGo, QUERY_DELAY)
+      internalRef.current.timeout = QUERY_DELAY == 0 ? searchFetchGo() : setTimeout(searchFetchGo, QUERY_DELAY)
 
   }
 
@@ -182,30 +185,36 @@ const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, Searc
     /** Because of the tight rate limit for the API key, we can use demo for BA in the search (IBM in the display) and that doesn't count against rate limit. */
     var apiKey = queryHere == 'BA' ? 'demo' : process.env.NEXT_PUBLIC_API_KEY
 
-    // TODO move out and generify
-    // also we can use fetch instead of ajaxWave
-    ajaxWave({
-      url: `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${paramE(queryHere)}&apikey=${apiKey}`,
-      callback: function (wave, request) {
-        delete searchFetchGo['in progress: ' + queryHere]
-        if (queryHere == resultsComponent.current.state.want) {
-          if (wave.json && request.status == 200 && wave.json.bestMatches)
-            resultsComponent.current.setState({ got: { query: queryHere, results: parseResults(wave) } })
-          else
-            resultsComponent.current.setState({ got: { query: queryHere, whoops: wave.json && (wave.json.Information || wave.json.Note) || wave.text || wave.whoops } })
-          handleEnterPressed()
-        }
-      },
-    })
+    async()
+    async function async() {
+      // TODO move out and generify
+      try {
+        var response: any = await jsonFetch(`https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${paramE(queryHere)}&apikey=${apiKey}`
+          , { timeout: 8000 })
+      } catch (e) {
+        var errStr = e
+      }
+
+      if (response)
+
+      delete searchFetchGo['in progress: ' + queryHere]
+      if (queryHere == resultsComponent.current.state.want) {
+        if (response && response.bestMatches)
+          resultsComponent.current.setState({ got: { query: queryHere, results: parseResults(response) } })
+        else
+          resultsComponent.current.setState({ got: { query: queryHere, whoops: response && (response.Information || response.Note) || errStr } })
+        handleEnterPressed()
+      }
+    }
   }
 
   /** @todo move out and generify */
-  function parseResults(wave) {
-    if (!wave.json.bestMatches)
+  function parseResults(response: { bestMatches: any }) {
+    if (!response.bestMatches)
       return null
     var dedup = {}
     var results = []
-    wave.json.bestMatches.forEach(r => {
+    response.bestMatches.forEach(r => {
       if (dedup[r['1. symbol']])
         return
       dedup[r['1. symbol']] = true
