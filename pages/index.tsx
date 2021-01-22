@@ -2,7 +2,8 @@ import Head from 'next/head'
 import { useRef, useState } from 'react'
 import useSWR from 'swr'
 import Layout from '../components/Layout'
-import SearchInput from '../components/SearchDropdown'
+import SearchDropdown, { SearchDropdownHandle } from '../components/SearchDropdown'
+import SearchInput from '../components/SearchDropdown-original-dom-version'
 import jsonFetch from '../lib/jsonFetch'
 import { noAction, noHref, paramE, roundC } from '../lib/util'
 
@@ -21,6 +22,8 @@ export default function Home() {
   const symbolsRef = useRef<string[]>()
   symbolsRef.current = symbols
 
+  var searchDropdownRef = useRef<SearchDropdownHandle>()
+
   return <Layout>
     <Head>
       <title>stocks.700software.com</title>
@@ -28,9 +31,9 @@ export default function Home() {
     <main className="the-width">
       <p>Enter up to three stocks or company names to compare stock prices.</p>
       <form ref={noAction}>
-        <SearchInput
+        <SearchDropdown ref={searchDropdownRef}
           placeholder="Stock Symbol or Company Name"
-          whenValue={(symbol, text, span) => {
+          whenValue={(symbol) => {
             if (!symbol)
               return ''
 
@@ -40,18 +43,14 @@ export default function Home() {
               if (symbols[i] == symbol)
                 var alreadyAdded = true
 
-            var [hidden, input] = span.querySelectorAll('input')
-
             if (symbols.length >= COMPARISON_COUNT_LIMIT && !alreadyAdded) {
               alert('Sorry, limit of 3 in the comparison.')
-              input.value = hidden.value
-              input.oninput()
+              searchDropdownRef.current.setValue('', symbol)
               return
             }
 
             // blank out the search value
-            input.value = ''
-            input.oninput()
+            searchDropdownRef.current.setValue('', '')
 
             for (var i = 0; i < symbols.length; i++)
               if (symbols[i] == symbol)
@@ -79,13 +78,16 @@ export default function Home() {
 
 function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (event: any) => void }): JSX.Element {
 
-  var { data, error } = useSWR<any>(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${paramE(symbol)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`, jsonFetch.then(json => {
+  /** Because of the tight rate limit for the API key, we can use demo for IBM (only IBM) and that doesn't count against rate limit. */
+  var apiKey = symbol == 'IBM' ? 'demo' : process.env.NEXT_PUBLIC_API_KEY
+
+  var { data, error } = useSWR<any>(`https://www.alphavantage.co/query?function=OVERVIEW&symbol=${paramE(symbol)}&apikey=${apiKey}`, jsonFetch.then(json => {
     if (json.Information) throw json.Information
     else if (json.Note) throw json.Note
     else return json
   }), { revalidateOnFocus: false })
 
-  var { data: dataQuote, error: errorQuote } = useSWR<any>(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${paramE(symbol)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`, jsonFetch.then(json => {
+  var { data: dataQuote, error: errorQuote } = useSWR<any>(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${paramE(symbol)}&apikey=${apiKey}`, jsonFetch.then(json => {
     if (json.Information) throw json.Information
     else if (json.Note) throw json.Note
     else return json['Global Quote']
@@ -94,7 +96,7 @@ function SymbolSection({ symbol, whenRemove }: { symbol: string, whenRemove: (ev
   if (data && !data.Name && JSON.stringify(data) == '{}') {
     data = null
     if (!error)
-    error = 'Empty response {} from API provided.\n\nTry another symbol to see more details.'
+      error = 'Empty response {} from API provided.\n\nTry another symbol to see more details.'
   }
 
   if (SUPPRESS_NETWORK_ERRORS) {

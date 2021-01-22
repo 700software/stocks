@@ -28,7 +28,7 @@ export function ellipsisTooltip(e: MouseEvent) {
  * @param propsCopy The object from which those entries will be captured and deleted.
  * @returns Same as `input` — after updating its values with those found in `propsCopy`.
  */
-export function extractProps(input: object, propsCopy: object): object {
+export function extractProps(input: object, propsCopy: object): any {
   for (var key in input) {
     if (key in propsCopy)
       input[key] = propsCopy[key]

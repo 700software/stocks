@@ -1,12 +1,12 @@
 //#
 //#
 //# Note BROWSER_CACHE in search-thing.js
-const QUERY_DELAY = 200
+const QUERY_DELAY = 300
 //#
 
-import React, { Component } from 'react'
-import { extractProps, paramE } from '../lib/util'
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react'
 import ajaxWave from '../lib/ajaxWave'
+import { extractProps, paramE } from '../lib/util'
 import SearchDropdownResults from './SearchDropdownResults'
 
 const space = ' '
@@ -16,123 +16,101 @@ const esc = 27
 const arrowUp = 38
 const arrowDown = 40
 
-export default React.forwardRef((props: any, ref) => <SearchDropdown {...props} innerRef={ref} />)
+/** Unexpected props could be any HTML attrs */
+type SearchDropdownProps = any
 
-class SearchDropdown extends React.Component {
-  public props: any
-
-  constructor(props) {
-    super(props)
-  }
-
-  shouldComponentUpdate(newProps) {
-    for (var k in newProps)
-      if (typeof newProps[k] == 'function')
-        continue
-      else if (newProps[k] != this.props[k])
-        return true
-    return false
-  }
-
-  render() { return render.call(this, this.props, this.state) }
+export type SearchDropdownHandle = {
+  setValue: (hiddenValue: string, searchString: string) => void,
 }
 
-function render(props, state) {
+const SearchDropdown: React.ForwardRefRenderFunction<SearchDropdownHandle, SearchDropdownProps> = function (props: SearchDropdownProps, ref) {
   var attrs = { ...props }
 
-  var hiddenAttrs = extractProps({ name: null, defaultValue: '' }, attrs)
-  var extraProps = extractProps({ defaultDisplay: '' }, attrs)
-  const { whenValue, innerRef } = extractProps({
+  const { name, whenValue } = extractProps({
     whenValue: null,
-    innerRef: null,
   }, attrs)
 
-  var resultsComponent = React.createRef<SearchDropdownResults>()
-  var span, hidden, input
+  const inputRef = useRef<HTMLInputElement>()
 
-  var blurringNow = false
+  const resultsComponent = useRef<SearchDropdownResults>()
+
+  const [valueHidden, setValueHidden] = useState('')
+  const [valueSearch, setValueSearch] = useState('')
+
+  const internalRef = useRef
+    <{ timeout?: any, enterPressed: { q: string, enterNotJustTabAway: boolean } | null, valueSearch?: string }>
+    ({ enterPressed: null })
+  internalRef.current.valueSearch = valueSearch
+
+  useImperativeHandle<any, SearchDropdownHandle>(ref, function () {
+    return {
+      setValue: (hiddenValue, searchString) => {
+        setValueHidden(hiddenValue)
+        setValueSearch(searchString)
+        resultsComponent.current.setState({ hoveredLink: null })
+        internalRef.current.enterPressed = null
+        oninput(searchString)
+      },
+    }
+  })
 
   return <>
-    <span className="SearchableDropdown" ref={node => {
-      if (node) eventHandlers(node)
-      if (innerRef) innerRef.current = node
-    }}>
-      <span className="material-icons">search</span>
-      <input type="hidden" {...hiddenAttrs} />
-      <input spellCheck={false} placeholder={space/* triggers :placeholder-shown */}
+    <span className="SearchableDropdown">
+      <span className="material-icons" data-hidden={valueHidden ? '' : null}>search</span>
+      <input type="hidden" value={valueHidden} name={name} />
+      <input spellCheck={false} value={valueSearch} placeholder={space/* triggers :placeholder-shown */}
         autoComplete="off" style={{ width: '17.5em' }}
-        defaultValue={extraProps.defaultDisplay} {...attrs} />
-      <span className="material-icons">clear</span>
+        {...attrs}
+        onChange={e => {
+          setValueSearch(e.currentTarget.value)
+          oninput(e.currentTarget.value)
+        }}
+        onFocus={onfocus}
+        onKeyDown={e => onkeydown.call(e.currentTarget, e)}
+        ref={node => {
+          inputRef.current = node
+          if (valueHidden && node) {
+            node.selectionStart = 0
+            node.selectionEnd = node.value.length
+            node.scrollLeft = 0
+          }
+        }}
+      />
+      <span className="material-icons" onMouseDown={clickedX}>clear</span>
       <SearchDropdownResults ref={resultsComponent} chose={chose} />
     </span>
   </>
 
   function chose(o, blurring) {
-    if (attrs.readOnly)
-      return
-    hidden.value = o.key
-    input.value = o.text
-    blurringNow = blurring
-    hidden.oninput()
-    blurringNow = false
-    if (hidden.value) {
-      if (!blurring) {
-        input.selectionStart = 0
-        input.selectionEnd = input.value.length
-        input.scrollLeft = 0
-      }
-    }
+    setValueHidden(o.key)
+    setValueSearch(o.text)
+    uponHiddenValueSet(o.key, o.text, blurring)
   }
 
-  function eventHandlers(s) {
-    span = s
-
-    var icon = span.firstChild
-    hidden = icon.nextSibling
-    input = hidden.nextSibling
-    var x = input.nextSibling
-
-    var balloon
-    var timeout = null
-    var enterPressed = null
-
-  hidden.oninput = function () {
+  function uponHiddenValueSet(valueHidden: string, valueSearch: string, blurringNow: boolean) {
     resultsComponent.current.setState({ hoveredLink: null })
-    enterPressed = null
-    if (hidden.value)
-      icon.setAttribute('data-hidden', '')
-    else
-      icon.removeAttribute('data-hidden')
-    whenValue(this.value, input.value, span, blurringNow)
+    internalRef.current.enterPressed = null
+    whenValue(valueHidden, valueSearch, blurringNow)
   }
-  input.onfocus = function () {
-    resultsComponent.current.setState({ want: this.value })
-    if (this.readOnly || !hidden.value)
+
+  function onfocus(e) {
+    resultsComponent.current.setState({ want: valueSearch })
+    if (!valueHidden)
       return
-    this.selectionStart = 0
-    this.selectionEnd = this.value.length
-    handleQueryMutation()
+    e.currentTarget.selectionStart = 0
+    e.currentTarget.selectionEnd = e.currentTarget.length
+    handleQueryMutation(valueSearch)
   }
-  input.onblur = function () {
-    if (balloon) {
-      var active = balloon.firstChild.lastChild.querySelector(':scope>a[data-active]')
-      if (active)
-        resultsComponent.current.choose(false, true)
-    }
+  function oninput(valueSearch) {
+    internalRef.current.enterPressed = null
+    setValueHidden('')
+    handleQueryMutation(valueSearch)
   }
-  input.oninput = function () {
-    enterPressed = null
-    if (hidden.value) {
-      hidden.value = ''
-      hidden.oninput()
-    }
-    handleQueryMutation()
-  }
-  input.onkeydown = function (e) {
+  function onkeydown(e) {
     if (e.keyCode == enter) {
       if (resultsComponent.current.state.want == null)
         resultsComponent.current.setState({ want: this.value })
-      enterPressed = { q: this.value, enterNotJustTabAway: true }
+      internalRef.current.enterPressed = { q: this.value, enterNotJustTabAway: true }
       handleEnterPressed()
       searchFetchGo()
       return false
@@ -143,53 +121,45 @@ function render(props, state) {
         resultsComponent.current.keyNav(e.keyCode == arrowUp ? -1 : 1)
       return false
     } else if (e.keyCode == tab && resultsComponent.current.state.hoveredLink) {
-      enterPressed = { q: this.value, enterNotJustTabAway: false }
+      internalRef.current.enterPressed = { q: this.value, enterNotJustTabAway: true }
       handleEnterPressed()
       searchFetchGo()
-    } else if (e.keyCode == esc && hidden.value) {
+    } else if (e.keyCode == esc && valueHidden) {
       this.oninput()
       return false
-    } else if (e.keyCode == esc && !hidden.value) {
+    } else if (e.keyCode == esc && !valueHidden) {
       resultsComponent.current.setState({ want: null, hoveredLink: null })
       // this.oninput()
       // return false
     }
   }
-  x.onmousedown = function (e) {
-    input.value = ''
-    input.oninput()
-    input.focus()
+  function clickedX(e) {
+    setValueSearch('')
+    oninput('')
+    inputRef.current.focus()
     e.preventDefault()
-    if (!input.readOnly)
-      input.focus()
   }
-
-  blurringNow = true
-  hidden.oninput()
-  blurringNow = false
 
   function handleEnterPressed() {
-    if (enterPressed)
-      if (resultsComponent.current.state.got && resultsComponent.current.state.got.query == enterPressed.q)
-        resultsComponent.current.choose(enterPressed.enterNotJustTabAway, !enterPressed.enterNotJustTabAway)
+    if (internalRef.current.enterPressed)
+      if (resultsComponent.current.state.got && resultsComponent.current.state.got.query == internalRef.current.enterPressed.q)
+        resultsComponent.current.choose(internalRef.current.enterPressed.enterNotJustTabAway, !internalRef.current.enterPressed.enterNotJustTabAway)
   }
 
-  function handleQueryMutation() {
-    enterPressed = null
+  function handleQueryMutation(valueSearch) {
+    internalRef.current.enterPressed = null
 
-    resultsComponent.current.setState({ want: input.value })
+    resultsComponent.current.setState({ want: valueSearch })
 
-    if (instantResult())
+    if (instantResult(valueSearch))
       return
 
-    if (timeout == null)
-      timeout = setTimeout(searchFetchGo, QUERY_DELAY)
+    if (internalRef.current.timeout == null)
+      internalRef.current.timeout = setTimeout(searchFetchGo, QUERY_DELAY)
 
   }
 
-  function instantResult() {
-    var q = resultsComponent.current.state.want
-
+  function instantResult(q) {
     if (q.length < 1) {
       resultsComponent.current.setState({ got: { query: q, gray: '...' } })
       return true
@@ -197,10 +167,10 @@ function render(props, state) {
   }
 
   function searchFetchGo() {
-    clearTimeout(timeout)
-    timeout = null
+    clearTimeout(internalRef.current.timeout)
+    internalRef.current.timeout = null
 
-    var queryHere = input.value
+    var queryHere = internalRef.current.valueSearch
 
     if (resultsComponent.current.state.got && resultsComponent.current.state.got.query == queryHere)
       return
@@ -209,9 +179,13 @@ function render(props, state) {
       return
     searchFetchGo['in progress: ' + queryHere] = true
 
+    /** Because of the tight rate limit for the API key, we can use demo for BA in the search (IBM in the display) and that doesn't count against rate limit. */
+    var apiKey = queryHere == 'BA' ? 'demo' : process.env.NEXT_PUBLIC_API_KEY
+
     // TODO move out and generify
+    // also we can use fetch instead of ajaxWave
     ajaxWave({
-      url: `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${paramE(queryHere)}&apikey=${process.env.NEXT_PUBLIC_API_KEY}`,
+      url: `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${paramE(queryHere)}&apikey=${apiKey}`,
       callback: function (wave, request) {
         delete searchFetchGo['in progress: ' + queryHere]
         if (queryHere == resultsComponent.current.state.want) {
@@ -243,5 +217,6 @@ function render(props, state) {
     })
     return results
   }
-  }
 }
+
+export default forwardRef(SearchDropdown)
