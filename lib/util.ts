@@ -67,12 +67,11 @@ export function paramE(x: string): string {
  * @param x user-provided number string to be rounded and commaized
  * @param digits max decimal digits rounding
  * @param minDigits min digits to display even if .00
- * @returns {number}
  */
-export function roundC(x: string | number, digits?: number, minDigits?: number) {
+export function roundC(x: string | number, digits?: number, minDigits?: number): number | string {
   if (typeof x == 'string') x = x.replace(/,/g, '') // auto-strips comma
-  if (digits == null) return x * 1 // returns same number if no rounding specified
-  x = round(x, digits, minDigits == null ? digits : minDigits) // returns string unless minDigits is zero
+  if (digits == null) return +x  // returns same number if no rounding specified
+  x = round(+x, digits, minDigits == null ? digits : minDigits) // returns string unless minDigits is zero
   return x == 0 ? '' : x
 }
 
