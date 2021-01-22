@@ -23,7 +23,7 @@ export default function Layout({ children }): JSX.Element {
     </header>
     {children}
     <footer>
-      <a href="https://github.com/700software/" target="_blank">
+      <a href="https://github.com/700software/stocks" target="_blank">
         <span className="material-icons">code</span>
         <span> </span>
         Source
